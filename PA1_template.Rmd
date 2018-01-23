@@ -13,6 +13,7 @@ output:
 data <- read.csv(unz("activity.zip", "activity.csv"))
 str(data)
 ```
+
 2. Process/transform the data into a format suitable for the analysis
 ```{R step2}
 data$date <- as.Date(data$date)
@@ -24,10 +25,12 @@ data$date <- as.Date(data$date)
 totalSteps <- aggregate(steps~date, data=data, sum, na.rm=TRUE)
 head(totalSteps, 5)
 ```
+
 2. Plot the histogram of the total number of steps taken each day
 ```{R step4}
 hist(totalSteps$steps, main = "Steps per day", xlab = "Steps", col = "aliceblue", breaks = 15)
 ```
+
 3. Calculate the mean and median of the total number of steps taken per day
 ```{R step5}
 stepMean <- round(mean(totalSteps$steps), 1)
@@ -74,3 +77,13 @@ hist(totalStepsNew$steps, main = "Steps per day", xlab = "Steps", col = "alicebl
 The mean of total steps after imputing is `r stepMeanNew`, and its median is `r stepMedianNew`. The mean/median difference after imputing are `r 100*round((abs(stepMeanNew-stepMean))/stepMean, 3)`% and `r 100*round((abs(stepMedianNew-stepMedian))/stepMedian, 3)`%, respectively. The differences are small. Therefore, it does not change the distribution of the histogram.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```{R step11, message=FALSE}
+library(lubridate); library(lattice)
+data_imputed$days <- mapply(wday, data_imputed$date)
+data_imputed$days <- ifelse(data_imputed$days %in% c(1,7), "weekend", "weekday")
+stepsInterval2 = aggregate(steps ~ interval + days, data_imputed, mean)
+xyplot(steps ~ interval | factor(days), data = stepsInterval2, aspect = 1/2, type = "l", xlab="Interval", ylab="Steps")
+```
+
+The main difference between weekday- and weekend- activities is clearly seen for the morning time, where the weekday-activities have a strong peak.
