@@ -36,11 +36,41 @@ stepMedian <- median(totalSteps$steps)
 The mean of total steps is `r stepMean`, and its median is `r stepMedian`.
 
 ## What is the average daily activity pattern?
+1. Make a time series plot (i.e. type = "l") of the 5-minute interval (x-axis) and the average number of steps taken, averaged across all days (y-axis)
+```{R step6}
+stepsInterval <- aggregate(steps ~ interval, data = data, mean, na.rm = TRUE)
+plot(steps ~ interval, data = stepsInterval, type = "l", main = "Average steps in 5-minute intervals", xlab = "5-min Interval", ylab="Steps")
+```
 
-
+2. Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
+```{R step7}
+maxSteps <- stepsInterval[which.max(stepsInterval$steps), ]$interval
+```
+The maximun number of steps locates at the Nr.`r maxSteps` interval.
 
 ## Imputing missing values
+1. Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{R step8}
+NAs <- sum(is.na(data))
+```
+There are `r NAs` missing values in the dataset.
 
+2. Devise a strategy for filling in all of the missing values in the dataset.
+```{R step9}
+library(DMwR2)
+data_imputed <- knnImputation(data)
+str(data_imputed)
+```
+The K-Nearest Neighbours(KNN) method is used here to impute the data.
 
+3. Make a histogram of the total number of steps taken each day. Calculate and report the mean and median total number of steps taken per day.
+```{R step10}
+totalStepsNew <- aggregate(steps ~ date, data = data_imputed, sum)
+stepMeanNew <- round(mean(totalStepsNew$steps), 1)
+stepMedianNew <- median(totalStepsNew$steps)
+hist(totalStepsNew$steps, main = "Steps per day", xlab = "Steps", col = "aliceblue", breaks = 15)
+```
+
+The mean of total steps after imputing is `r stepMeanNew`, and its median is `r stepMedianNew`. The mean/median difference after imputing are `r 100*round((abs(stepMeanNew-stepMean))/stepMean, 3)`% and `r 100*round((abs(stepMedianNew-stepMedian))/stepMedian, 3)`%, respectively. The differences are small. Therefore, it does not change the distribution of the histogram.
 
 ## Are there differences in activity patterns between weekdays and weekends?
